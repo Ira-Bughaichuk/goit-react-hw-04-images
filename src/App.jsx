@@ -1,88 +1,77 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { getGallery } from '../src/services/postGallery';
 
-import Searchbar from './components/Searchbar/Searchbar';
-import ImageGallery from './components/ImageGallery/ImageGallery';
-import Loader from './components/Loader/Loader.jsx';
-import Modal from './components/Modal/Modal';
-import Button from './components/Button/Button';
+import { Searchbar } from './components/Searchbar/Searchbar';
+import { ImageGallery } from './components/ImageGallery/ImageGallery';
+import { Loader } from './components/Loader/Loader.jsx';
+import { Modal } from './components/Modal/Modal';
+import { Button } from './components/Button/Button';
 import { AppDiv } from './App.styled';
 
-export class App extends Component {
-  state = {
-    search: '',
-    page: 1,
-    gallery: [],
-    isLoading: false,
-    isShowModal: false,
-    error: null,
-    total_pages: null,
-    currentImg: '',
-  };
+export const App = () => {
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [gallery, setGallery] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isShowModal, setIsShowModal] = useState(false);
+  const [error, setError] = useState(null);
+  const [total_pages, setTotalPages] = useState(null);
+  const [currentImg, setCurrentImg] = useState('');
 
-  componentDidUpdate(_, prevState) {
-    if (
-      this.state.search !== prevState.search ||
-      this.state.page !== prevState.page
-    ) {
-      this.fetchPosts();
+  useEffect(() => {
+    if (!search) {
+      return;
     }
-  }
+    const fetchPosts = async () => {
+      setIsLoading(true);
+      try {
+        const result = await getGallery(search, page);
+        setIsLoading(false);
+        console.log(result);
+        setGallery(prev => [...prev, ...result.hits]);
+        setTotalPages(Math.ceil(result.totalHits / 12));
+      } catch (error) {
+        alert(error.message);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  fetchPosts = async () => {
-    this.setState({ isLoading: true });
-    try {
-      const result = await getGallery(this.state.search, this.state.page);
-      this.setState({ isLoading: false });
-      console.log(result);
-      this.setState(prevState => ({
-        gallery: [...prevState.gallery, ...result.hits],
-        total_pages: Math.ceil(result.totalHits / 12),
-      }));
-    } catch (error) {
-      alert(error.message);
-      this.setState({ error: error.message });
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  };
+    fetchPosts();
+  }, [page, search]);
 
-  handlerFormSubmit = imgName => {
-    this.setState({ search: imgName, page: 1, gallery: [] });
-  };
-  handleChangePage = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-  };
-  handleToggle = value => {
-    this.setState(prevState => ({
-      isShowModal: !prevState.isShowModal,
-    }));
-  };
-  handleOpenModal = value => {
-    this.setState({ isShowModal: true, currentImg: value });
+  const handlerFormSubmit = imgName => {
+    setSearch(imgName);
+    setPage(1);
+    setGallery([]);
   };
 
-  render() {
-    const { isLoading, isShowModal, currentImg } = this.state;
-    const isShowButton = this.state.gallery.length > 0 && !isLoading;
-    const isHidden = this.state.total_pages === this.state.page;
-    console.log(isHidden);
-    return (
-      <AppDiv>
-        <Searchbar onSubmit={this.handlerFormSubmit} />
+  const handleChangePage = () => {
+    setPage(prev => prev + 1);
+  };
+  const handleToggle = () => {
+    setIsShowModal(prev => !prev);
+  };
+  const handleOpenModal = value => {
+    setIsShowModal(true);
+    setCurrentImg(value);
+  };
 
-        <ImageGallery
-          onClick={this.handleOpenModal}
-          gallery={this.state.gallery}
-        />
-        {isLoading && <Loader />}
-        {isShowButton ? (
-          <Button onClick={this.handleChangePage} hidden={isHidden} />
-        ) : null}
-        {isShowModal && (
-          <Modal currentImg={currentImg} onCloseModal={this.handleToggle} />
-        )}
-      </AppDiv>
-    );
-  }
-}
+  const isShowButton = gallery.length > 0 && !isLoading;
+  const isHidden = total_pages === page;
+  return (
+    <AppDiv>
+      <Searchbar onSubmit={handlerFormSubmit} />
+
+      <ImageGallery onClick={handleOpenModal} gallery={gallery} />
+      {isLoading && <Loader />}
+      {isShowButton ? (
+        <Button onClick={handleChangePage} hidden={isHidden} />
+      ) : null}
+      {isShowModal && (
+        <Modal currentImg={currentImg} onCloseModal={handleToggle} />
+      )}
+    </AppDiv>
+  );
+};

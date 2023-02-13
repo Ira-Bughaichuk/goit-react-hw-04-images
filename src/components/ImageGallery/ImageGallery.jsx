@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
+import { ImageGalleryItem } from '../ImageGalleryItem/ImageGalleryItem';
 import { ImageGalleryUl } from './ImageGallery.styled';
 
-export default function ImageGallery({ gallery, onClick }) {
+export const ImageGallery = ({ gallery, onClick }) => {
   if (gallery.length === 0) {
     return null;
   }
@@ -15,7 +15,7 @@ export default function ImageGallery({ gallery, onClick }) {
       })}
     </ImageGalleryUl>
   );
-}
+};
 
 ImageGallery.propTypes = {
   gallery: PropTypes.arrayOf(

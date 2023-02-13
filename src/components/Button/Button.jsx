@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ButtonLoadMore } from './ButtonLoadMore.styled';
 
-export default function Button({ onClick, hidden }) {
+export const Button = ({ onClick, hidden }) => {
   return (
     <ButtonLoadMore
       className="button"
@@ -13,7 +13,7 @@ export default function Button({ onClick, hidden }) {
       Load More
     </ButtonLoadMore>
   );
-}
+};
 
 Button.prototype = {
   onClick: PropTypes.func.isRequired,
