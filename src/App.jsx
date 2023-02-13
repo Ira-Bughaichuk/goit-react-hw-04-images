@@ -14,7 +14,6 @@ export const App = () => {
   const [gallery, setGallery] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isShowModal, setIsShowModal] = useState(false);
-  const [error, setError] = useState(null);
   const [total_pages, setTotalPages] = useState(null);
   const [currentImg, setCurrentImg] = useState('');
 
@@ -33,7 +32,6 @@ export const App = () => {
       } catch (error) {
         console.log(error);
         alert(error.message);
-        setError(error);
       } finally {
         setIsLoading(false);
       }
